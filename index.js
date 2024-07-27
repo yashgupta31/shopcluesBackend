@@ -3,10 +3,20 @@ const dotenv= require("dotenv")
 dotenv.config()
 const userRouter= require('./routes/user.route')
 const connection= require('./config/db')
+const cors= require('cors')
 
 const PORT= process.env.PORT
-
 const app= express()
+
+app.use(cors());
+app.options('*', cors());
+app.all('*', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
+
 app.use(express.json())
 app.use('/user', userRouter)
 
