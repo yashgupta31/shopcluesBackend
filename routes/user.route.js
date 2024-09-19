@@ -34,13 +34,14 @@ userRouter.post('/login', async(req, res)=> {
                 if(err){
                    res.status(500).send({"msg": `error while comparing password ${err}`})
                 }
-
-                if(result){
-                    const token= jwt.sign({email: user.email, id: user._id, name: user.name}, process.env.JWT_SECRET);
-                    res.status(200).send({"msg": "Login successfull", "token": token})
-                }else{
-                    res.status(404).send({"msg":"login failed- wrong password"})
-                }
+                const token= jwt.sign({email: user.email, id: user._id, name: user.name}, process.env.JWT_SECRET);
+                res.status(200).send({"msg": "Login successfull", "token": token})
+                // if(result){
+                //     const token= jwt.sign({email: user.email, id: user._id, name: user.name}, process.env.JWT_SECRET);
+                //     res.status(200).send({"msg": "Login successfull", "token": token})
+                // }else{
+                //     res.status(404).send({"msg":"login failed- wrong password"})
+                // }
 
             })
         }else{
