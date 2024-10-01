@@ -2,6 +2,7 @@ const express= require('express');
 const bcrypt= require('bcrypt');
 const UserModel= require('../models/user.model')
 const jwt= require('jsonwebtoken');
+const isAdmin = require('../middleware/isAdmin.middleware');
 
 const userRouter= express.Router();
 
@@ -34,7 +35,7 @@ userRouter.post('/login', async(req, res)=> {
                 if(err){
                    res.status(500).send({"msg": `error while comparing password ${err}`})
                 }
-                const token= jwt.sign({email: user.email, id: user._id, name: user.name}, process.env.JWT_SECRET);
+                const token= jwt.sign({email: user.email, id: user._id, name: user.name, isAdmin: user.isAdmin}, process.env.JWT_SECRET);
                 res.status(200).send({"msg": "Login successfull", "token": token})
                 // if(result){
                 //     const token= jwt.sign({email: user.email, id: user._id, name: user.name}, process.env.JWT_SECRET);

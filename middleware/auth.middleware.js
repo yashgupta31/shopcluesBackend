@@ -10,6 +10,7 @@ const auth=(req, res, next)=>{
             return res.status(403).send(`Token verification failed: ${error.message}`);
         }
         req.body.userId= decoded.id
+        // req.body.user= decoded;
         next()
     })
 }

@@ -50,7 +50,7 @@ cartRouter.get('/getcart', auth, async(req, res)=>{
     const cartItems = await CartModel.find({ userId }).populate('productId');
 
     // Log the cartItems to see what is returned before sending the response
-    console.log('Cart items:', cartItems);
+    // console.log('Cart items:', cartItems);
 
     if (!cartItems) {
       return res.status(404).json({ message: 'No items found in cart' });

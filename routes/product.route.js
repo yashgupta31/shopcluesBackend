@@ -1,12 +1,17 @@
 const express = require('express')
 const ProductModel = require('../models/product.model');
 const auth = require('../middleware/auth.middleware');
+const isAdmin = require('../middleware/isAdmin.middleware');
 
 const productRouter = express.Router();
 
 // Route for create product
-productRouter.post('/create', auth, async (req, res) => {
+productRouter.post('/create', isAdmin,  async (req, res) => {
     const { name, type, brand, image, price, oldPrice, rating } = req.body;
+
+    if (!req.user.isAdmin) {
+      return res.json({ message: 'Access denied. only Admin can list a product' });
+  }
 
     try {
         const product = new ProductModel({ name, type, brand, image, price, oldPrice, rating })
@@ -58,6 +63,7 @@ productRouter.get('/getall/:type', async (req, res) => {
       const productType = req.params.type;
       const productBrand = req.query.brand;
       const productRating = req.query.rating;
+      const sortByPrice= req.query.price;
       const page= req.query.page;
       const limit= 8;
       const skip= (page-1)*limit;
@@ -73,16 +79,26 @@ productRouter.get('/getall/:type', async (req, res) => {
       if (productRating !== 'all') {
         filter.rating = { $gte: productRating };
       }
-  
-      // Find products based on the filter
-      const products = await ProductModel.find(filter).skip(skip).limit(limit);
+
+      
+    let productQuery = ProductModel.find(filter).skip(skip).limit(limit);
+
+    // Apply sorting only if the sortByPrice is not 'all'
+    if (sortByPrice !== 'all') {
+      const sortDirection = sortByPrice === 'high' ? -1 : 1;
+      productQuery = productQuery.sort({ price: sortDirection });
+    }
+
+    // Execute the product query
+    const products = await productQuery;
       const pageCount= await ProductModel.countDocuments(filter)/limit
+      const totalProducts= await ProductModel.find(filter)
   
       // Get distinct brands based on product type (brand is not considered here)
       const brands = await ProductModel.distinct('brand', { type: productType });
   
       // Send products and brands as the response
-      res.status(200).json({products, pageCount: Math.ceil(pageCount), brands});
+      res.status(200).json({products, pageCount: Math.ceil(pageCount), brands, totalProducts});
     } catch (error) {
       res.status(500).send(`Internal server error: ${error}`);
     }
